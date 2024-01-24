@@ -134,6 +134,253 @@ function throwError(message: string): never {
 Se trata de una funcion para manejar errores, lo cual sabemos que no nos devolvera nada (diferencia con *void*), en ese caso utilizamos el tipo *never*. Porque sabemos que la función termina en THROW y no llega hasta el final, no hay *return* implicito.
 
 
+## Objetos
+
+Como ya sabemos, pueden tener inferencia de datos, pero pueden haber confusiones al crear los TIPOS, cuando justamente creamos un nuevo objeto. Para eso tenemos disponible los *Type Alias*
+
+```
+// Alias
+type Hero = {
+    name: string,
+    age: number
+}
+
+let hero: Hero = {
+    name: 'Thor',
+    age: 1500
+}
+function createHero(name: string, age: number): Hero {
+    return {
+        name,
+        age
+    }
+}
+
+const thor = createHero('Thor', 1500)
+```
+***Usamos el PASCAL CASE para crear los ALIAS***
+Lo encapsulamos en un contrato, en el cual le decimos como es el objeto que queremos crear, en este caso es de tipo *Hero*.
+
+Dentro de nuestro objeto podemos tener propiedades opcionales, y lo podemos definir en nuestro *Alias*.
+
+```
+type Hero = {
+    name: string,
+    age: number,
+    isActive?: boolean 
+}
+```
+Con el símbolo de "?" lo hacemos opcional, o sea, podemos hacer uso de esa propiedad o no. 
+
+Uno de los principales problemas que hay con JS, es la *mutabilidad*, esto quiere decir que, cualquiera puede venir a modificar, o *mutar*, algun campo o dato sin tener ningna restricción al intentarlo. 
+Por supuesto, en TS se puede evitar esto al crear nuestros *Alias*.
+
+```
+type Hero = {
+    readonly id?: number, // Hacemos que sea solo de lectura
+    name: string,
+    age: number,
+    isActive?: boolean 
+}
+```
+Agregamos la propiedad que sea solo de lectura, con el *readonly*. Ya no podemos acceder a esta propiedad sin que muestre un error si intentamos *mutarla*, pero sin embargo, no es inmutable, en tiempo de ejecución (es decir cuando se convierte en JS) el navegador no reconoce TS (como ya se mencionó), este ultimo nos ayuda a detectar esos errores. Se puede hacer inmutable, pero sería con utilizando codigo JS.
+
+**<<<-Templates Union Types->>>>**
+
+Dentro de la creacion de TYPES, también podemos crear otros TYPES dentro de estos.
+
+```
+type HeroId = `${string}-${string}-${string}-${string}-${string}`
+
+type Hero = {
+    readonly id?: HeroId,
+    name: string,
+    age: number,
+    isActive?: boolean 
+}
+```
+Como la *id* de *Hero* va a ser un UUID, le decimos que el TYPE va a tener ese formato, y TS nos marcará como error si no mantenemos dicho formato de ID.
+
+Puede resultar util cuando no recordamos la consistencia de ciertos caracteres, como por ejemplo, numeros hexadecimales.
+
+```
+type HexadecimalColor = `#${string}`
+const color: HexadecimalColor = '0033ff' // -->Error: type '0033ff' is not assignable to type `#${string}`
+const color2: HexadecimalColor = '#0033ff' // Ok, color
+```
+*No hay que tener en cuenta todo esto como una validación. Nada se ejecutará en la ejecución.*
+
+**<<<-Union Types->>>>**
+
+Se puede decir que es una union de TYPES. Lo que significa que, puede tener varias opciones de TYPES.
+
+```
+let annn : number | string
+
+annn = true // -> Error: type 'boolean' is not assignable to type 'string | number'
+ ```
+TS nos marca un ERROR al no tratarse de un TYPE STRING o (*OR*) un TYPE NUMBER. No es que sea un TIPO, es un TIPO CONCRETO.
+
+```
+type HeroPowerScale = 'local' | 'planetary' | 'galactic' | 'universal' | 'multiversal' 
+
+type Hero = {
+    readonly id?: HeroId,
+    name: string,
+    age: number,
+    isActive?: boolean,
+    powerScale?: HeroPowerScale 
+}
+
+const thor = createHero('Thor', 1500)
+thor.powerScale = 'multiversal'
+```
+
+Cuando empecemos a crear el OBJETO, nos mostrara todas las opciones que tenemos en los TIPOS CONCRETOS.
+
+**<<<-Intersection Types->>>>**
+
+Es diferente al UNION, dado que, aca estamos haciendo una INTERSECCION, es decir, es un TIPO y otro TIPO. Estamos utilizando un *AND*.
+
+```
+type HeroBasicInfo = {
+    name: string,
+    age: number
+ }
+
+ type HeroProperties = {
+     readonly id?: HeroId,
+     isActive?: boolean,
+     powerScale?: HeroPowerScale 
+ }
+
+ type Hero = HeroBasicInfo & HeroProperties
+```
+Decirmos que, el *Type Hero*, debe contener *HeroBasicInfo* Y *HeroProperties*
+
+**<<<-Type Indexing->>>>**
+
+Nos permite usar partes de un Type.
+
+```
+type HeroProperties = {
+    isActive: boolean,
+    address: {
+        planet: string,
+        city: string
+    }
+}
+
+const addressHero: HeroProperties['address'] = {   
+    planet: 'Earth',
+    city: 'Madrid'
+ }
+```
+Cuando creamos *addressHero*, pudimos tomar parte del Type *HeroProperties* llamando a este mismo con el *index = address*.
+
+**<<<-Type from value->>>>**
+
+Podemos crear un Type a traves de una constante:
+
+```
+const address = {
+    planet: 'Earth',
+    city: 'Madrid'
+}
+
+type Address = typeof address
+```
+En JS, *typeof* es metodo para saber el TIPO. Cuando hacemos esto, y al crear otro objeto, este va a esperar las mismas propiedades que la constante de donde sacamos los TIPO.
+
+```
+const addressTwitch: Address = {
+    planet: 'Mars',
+    city: 'Twitch'
+}
+```
+Ya podemos crear Types a partir de código que ya tengamos.
+
+**<<<-Type from function return->>>>**
+
+Podemos recupear el Type de lo que retorna una función. Esto es un *utility*.
+
+```
+function createAddress() {
+    return {
+        planet: 'Earth',
+        city: 'Madrid'
+    }
+}
+
+type Address = ReturnType<typeof createAddress>
+```
+Lo que devuelve la función *createAddress* lo utilizamos como el *Type Address*, mediante el *ReturnType* para guardar ese TIPO.
+
+
+## Arrays
+
+Al no TIPAR correctamente nuestro ARRAY, nos dira que es de *Type: Never*, o sea, que siempre tiene que estar vacío.
+
+```
+// Arrays
+const languages = []
+
+languages.push('JavaScript') // Argument of type 'string' is not assignable to parameter of type 'never'.
+```
+Lo TIPAMOS.
+
+```
+const languages: string[] = []
+
+languages.push('JavaScript')
+```
+Hasta aca puede funcionar, es un ARRAY de STRINGS y no tendrá problemas de añadir un elemento más. Pero en cuanto le intentemos poner un *Type: number* (o cualquier otro *Type*), ahi nos dará un ERROR en TS.
+Para estos casos, es necesario utilizar una UNION de *Types*, pero dentro un parentesis.
+
+```
+const languagesMixedArray: (string | number)[] = []
+languagesMixedArray.push('Java')
+languagesMixedArray.push(2)
+```
+Es posible crear un ARRAY con nuestro propios TIPOS.
+
+```
+type HeroBasicInfo = {
+    id?: number,
+    name: string,
+    age: number
+}
+
+const herosWithBasicInfo: HeroBasicInfo[] = []
+```
+
+**<--Array de Arrays-->**
+
+Esta seria la forma de darle un correcto tipado a un ARRAY, que a su vez, contiene varios ARRAYS.
+
+```
+const gameBoard:  string[][] = [
+    ['X', 'O', 'X'], 
+    ['O', 'X', 'O'], 
+    ['X', '', 'O']   
+] 
+```
+**Ta-te-ti**
+En este caso, queremos que en este ARRAY solo admita elementos tales como: 'X', 'O' o '' (espacio vacío). Pero si intentamos agregarle cualquier otro valor, no había problema en este momento, después de todo, tan solo es un ARRAY de ARRAYS, que admite valores STRING.
+
+Para solucionar esto, TIPAMOS los *Types* que irán dentro de las celdas.
+```
+type CellValue = 'X' | 'O' | '' 
+
+const gameBoard:  CellValue[][] = [
+    ['X', 'O', 'X'], 
+    ['O', 'X', 'O'], 
+    ['X', '', 'O']   
+] 
+
+gameBoard[0][1] = 'X'
+```
+
 
 
 
