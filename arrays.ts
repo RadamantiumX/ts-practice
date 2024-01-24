@@ -29,8 +29,13 @@ Tenemos el siguiente Array de Arrays, que son Strings
 ]
 */
 type CellValue = 'X' | 'O' | '' // Tipamos los Types que pueden haber dentro de las celdas
+type GameBoard = [
+    [CellValue, CellValue, CellValue],
+    [CellValue, CellValue, CellValue],
+    [CellValue, CellValue, CellValue]
+] // Tipamos la cantidad de elementos por ARRAY, que son 3 por cada uno
 
-const gameBoard:  CellValue[][] = [
+const gameBoard:  GameBoard = [
     ['X', 'O', 'X'], 
     ['O', 'X', 'O'], 
     ['X', '', 'O']   

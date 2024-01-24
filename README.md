@@ -366,6 +366,7 @@ const gameBoard:  string[][] = [
 ] 
 ```
 **Ta-te-ti**
+
 En este caso, queremos que en este ARRAY solo admita elementos tales como: 'X', 'O' o '' (espacio vacío). Pero si intentamos agregarle cualquier otro valor, no había problema en este momento, después de todo, tan solo es un ARRAY de ARRAYS, que admite valores STRING.
 
 Para solucionar esto, TIPAMOS los *Types* que irán dentro de las celdas.
@@ -380,6 +381,29 @@ const gameBoard:  CellValue[][] = [
 
 gameBoard[0][1] = 'X'
 ```
+
+Aun queda el detalle de poder *Tipar* la cantidad de elementos que van en cada *Array*, para que no rompa el molde del *Ta-te-ti*.
+
+```
+type GameBoard = [
+    [CellValue, CellValue, CellValue],
+    [CellValue, CellValue, CellValue],
+    [CellValue, CellValue, CellValue]
+]
+
+const gameBoard:  GameBoard = [
+    ['X', 'O', 'X'], 
+    ['O', 'X', 'O'], 
+    ['X', '', 'O']   
+] 
+```
+El *Type* que creamos para el *GameBoard* es una *Tupla*, por que tiene un limite fijado. Como un ejemplo de *Tupla*, podemos decir que el *useState()* de *React*, es una *Tupla*, ya que siempre tendrá dos posiciones:
+
+```
+import { useState } from 'react'
+const [hero, setHero] = useState('thor')
+```
+
 
 
 
